@@ -24,4 +24,11 @@ const getGamesFiltered = (filter: string): Observable<rawgWrap> => {
   return deferrer(axios.get(`/games?search=${filter}`));
 };
 
-export { getAllGames, getGamesFiltered };
+const getTopGames = (): Observable<rawgWrap> => {
+  console.log("axios call");
+  return deferrer(axios.get(`/games?ordering=-rating`)).pipe(
+    map((res) => res.data)
+  );
+};
+
+export { getAllGames, getGamesFiltered, getTopGames };

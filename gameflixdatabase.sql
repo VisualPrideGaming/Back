@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS games(
     release_date date,
     genre INT NOT NULL,
     image_game VARCHAR(100),
-    developer VARCHAR(80) NOT NULL
+    developer VARCHAR(80) NOT NULL,
+    rating INT
 );
 
 CREATE TABLE IF NOT EXISTS platform_games(
