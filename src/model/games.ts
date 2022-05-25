@@ -13,8 +13,10 @@ interface rawgWrap {
 interface IGame {
   id: number;
   name: string;
+  image: string;
   platforms: platform[];
   released: string;
+  developer: string;
   rating: number;
   genres: genres[];
   reviews: reviews[];
@@ -30,12 +32,12 @@ interface platform extends subOption {}
 interface genres extends subOption {}
 interface reviews extends subOption {}
 
-const checkGamesToSave = (idList: number[]): Observable<IGame[]> => {
+const checkGamesToSave = (nameList: string[]): Observable<IGame[]> => {
   console.log(`Get All Users from DB`);
   return deferrer(
     Game.findAll({
       where: {
-        id: idList,
+        game_name: nameList,
       },
     })
   ).pipe(
@@ -44,6 +46,8 @@ const checkGamesToSave = (idList: number[]): Observable<IGame[]> => {
         (game: GameModel): IGame => ({
           id: game.id,
           name: game.game_name,
+          image: game.image_game,
+          developer: game.developer,
           platforms: [],
           released: game.release_date,
           rating: game.rating,
@@ -55,4 +59,9 @@ const checkGamesToSave = (idList: number[]): Observable<IGame[]> => {
   );
 };
 
-export { IGame, rawgWrap, genres, platform, checkGamesToSave };
+const createMany = (games: any[]) => {
+  console.log(`Create the games in DB`);
+  return deferrer(Game.bulkCreate(games));
+};
+
+export { IGame, rawgWrap, genres, platform, checkGamesToSave, createMany };

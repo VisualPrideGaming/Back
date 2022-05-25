@@ -21,12 +21,12 @@ CREATE TABLE IF NOT EXISTS genres(
 
 CREATE TABLE IF NOT EXISTS games(
     id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    game_name VARCHAR(50) NOT NULL,
-    platform INT NOT NULL,
+    game_name VARCHAR(50) NOT NULL UNIQUE,
+    platform INT ,
     release_date date,
-    genre INT NOT NULL,
+    genre INT ,
     image_game VARCHAR(100),
-    developer VARCHAR(80) NOT NULL,
+    developer VARCHAR(80),
     rating INT
 );
 

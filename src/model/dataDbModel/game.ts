@@ -3,7 +3,7 @@ import { DataTypes } from "sequelize";
 import { connection } from "../../util/db";
 
 const Game = connection.define(
-  "Games",
+  "games",
   {
     //id: DataTypes.NUMBER,
     game_name: DataTypes.STRING,
@@ -18,7 +18,7 @@ const Game = connection.define(
 );
 
 interface GameModel {
-  id: number;
+  id?: number;
   game_name: string;
   platform: number;
   release_date: string;

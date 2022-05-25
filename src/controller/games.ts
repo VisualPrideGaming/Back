@@ -1,5 +1,5 @@
-import { EMPTY, map, Observable, of, switchMap } from "rxjs";
-import { checkGamesToSave, IGame, rawgWrap } from "../model/games";
+import { catchError, EMPTY, map, Observable, of, switchMap } from "rxjs";
+import { checkGamesToSave, createMany, IGame, rawgWrap } from "../model/games";
 import { deferrer } from "../util/promise2Observable";
 import env from "../util/config";
 import axiosMaster from "axios";
@@ -31,19 +31,35 @@ const getTopGames = (): Observable<rawgWrap> => {
     .pipe(map((res) => res.data))
     .pipe(
       switchMap((res: rawgWrap): Observable<any> => {
-        const gamesIds = res.results.map((game: IGame) => game.id);
+        const gamesIds = res.results.map((game: IGame) => game.name);
 
         return checkGamesToSave(gamesIds).pipe(
           switchMap((games: IGame[]): Observable<any> => {
             if (gamesIds.length !== games.length) {
-              const gamesDbId = games.map((game: IGame) => game.id);
-              gamesIds
+              const gamesDbId = games.map((game: IGame) => game.name);
+              const gamesToCreate = gamesIds
                 .filter((x) => !gamesDbId.includes(x))
-                .forEach((id: number) => {
+                .map((name: string) => {
                   const gameFound = res.results.find(
-                    (game: IGame) => game.id === id
+                    (game: IGame) => game.name === name
                   );
+
+                  return {
+                    game_name: gameFound.name,
+                    platform: null,
+                    release_date: gameFound.released,
+                    genre: null,
+                    image_game: gameFound.image,
+                    developer: gameFound.developer,
+                    rating: gameFound.rating,
+                  };
                 });
+
+              createMany(gamesToCreate).pipe(
+                catchError((err) => {
+                  throw "error : " + err;
+                })
+              );
             }
 
             return of(res);
