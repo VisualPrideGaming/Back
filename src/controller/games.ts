@@ -1,9 +1,11 @@
-import { catchError, EMPTY, map, Observable, of, switchMap } from "rxjs";
-import { checkGamesToSave, createMany, IGame, rawgWrap } from "../model/games";
+import { catchError, EMPTY, map, Observable, of, switchMap, tap } from "rxjs";
+import { findGamesOrCreate, IGame, rawgWrap } from "../model/games";
 import { deferrer } from "../util/promise2Observable";
 import env from "../util/config";
 import axiosMaster from "axios";
 import { response } from "express";
+import { Platform } from "../model/dataDbModel/platform";
+import { Genre } from "../model/dataDbModel/genres";
 
 const axios = axiosMaster.create({
   baseURL: `${env.RAWG_API_URL}`,
@@ -27,46 +29,22 @@ const getGamesFiltered = (filter: string): Observable<rawgWrap> => {
 
 const getTopGames = (): Observable<rawgWrap> => {
   console.log("axios call");
-  return deferrer(axios.get(`/games?ordering=-rating&page_size=10`))
-    .pipe(map((res) => res.data))
-    .pipe(
-      switchMap((res: rawgWrap): Observable<any> => {
-        const gamesIds = res.results.map((game: IGame) => game.name);
+  return deferrer(axios.get(`/games?ordering=-rating&page_size=10`)).pipe(
+    map((res) => res.data),
+    tap((res: rawgWrap) => {
+      const gamesToCheck = res.results.map((game) => ({
+        name: game.name,
+        released: game.released,
+        developer: null,
+        rating: game.rating,
+        image: game.background_image,
+        genres: game.genres.map((genre) => genre.name),
+        platforms: game.platforms.map((platform) => platform.platform.name),
+      }));
 
-        return checkGamesToSave(gamesIds).pipe(
-          switchMap((games: IGame[]): Observable<any> => {
-            if (gamesIds.length !== games.length) {
-              const gamesDbId = games.map((game: IGame) => game.name);
-              const gamesToCreate = gamesIds
-                .filter((x) => !gamesDbId.includes(x))
-                .map((name: string) => {
-                  const gameFound = res.results.find(
-                    (game: IGame) => game.name === name
-                  );
-
-                  return {
-                    game_name: gameFound.name,
-                    platform: null,
-                    release_date: gameFound.released,
-                    genre: null,
-                    image_game: gameFound.image,
-                    developer: gameFound.developer,
-                    rating: gameFound.rating,
-                  };
-                });
-
-              createMany(gamesToCreate).pipe(
-                catchError((err) => {
-                  throw "error : " + err;
-                })
-              );
-            }
-
-            return of(res);
-          })
-        );
-      })
-    );
+      findGamesOrCreate(gamesToCheck);
+    })
+  );
 };
 
 const generateRawgWrap = () => {

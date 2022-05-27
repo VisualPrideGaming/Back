@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     image_user VARCHAR(200) 
 );
 
-CREATE TABLE IF NOT EXISTS platform(
+CREATE TABLE IF NOT EXISTS platforms(
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     platform VARCHAR(80) NOT NULL
 );
@@ -22,50 +22,48 @@ CREATE TABLE IF NOT EXISTS genres(
 CREATE TABLE IF NOT EXISTS games(
     id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     game_name VARCHAR(50) NOT NULL UNIQUE,
-    platform INT ,
     release_date date,
-    genre INT ,
     image_game VARCHAR(100),
     developer VARCHAR(80),
     rating INT
 );
 
 CREATE TABLE IF NOT EXISTS platform_games(
-    id_game INT NOT NULL,
-    id_platform INT NOT NULL,
+    idGame INT NOT NULL,
+    idPlatform INT NOT NULL,
 
     CONSTRAINT FK_platformgames_platform
-    FOREIGN KEY (id_platform)
-    REFERENCES platform (id)
+    FOREIGN KEY (idPlatform)
+    REFERENCES platforms (id)
 	ON UPDATE CASCADE
     ON DELETE CASCADE,
 
     CONSTRAINT FK_platformgames_game
-    FOREIGN KEY (id_game)
+    FOREIGN KEY (idGame)
     REFERENCES games (id)
 	ON UPDATE CASCADE
     ON DELETE CASCADE,
 
-    PRIMARY KEY (id_game , id_platform)
+    PRIMARY KEY (idGame , idPlatform)
 );
 
 CREATE TABLE IF NOT EXISTS genres_games(
-    id_game INT NOT NULL,
-    id_genre INT NOT NULL,
+    idGame INT NOT NULL,
+    idGenre INT NOT NULL,
 
     CONSTRAINT FK_genresgames_genres
-    FOREIGN KEY (id_genre)
+    FOREIGN KEY (idGenre)
     REFERENCES genres (id)
 	ON UPDATE CASCADE
     ON DELETE CASCADE,
 
     CONSTRAINT FK_genresgames_game
-    FOREIGN KEY (id_game)
+    FOREIGN KEY (idGame)
     REFERENCES games (id)
 	ON UPDATE CASCADE
     ON DELETE CASCADE,
 
-    PRIMARY KEY (id_game , id_genre)
+    PRIMARY KEY (idGame , idGenre)
 );
 
 

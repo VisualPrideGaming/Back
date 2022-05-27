@@ -1,67 +1,101 @@
-import { map, Observable, of } from "rxjs";
+import {
+  async,
+  catchError,
+  EMPTY,
+  forkJoin,
+  map,
+  Observable,
+  of,
+  switchMap,
+} from "rxjs";
 import { connection } from "../util/db";
 import { deferrer } from "../util/promise2Observable";
 import { Game, GameModel } from "./dataDbModel/game";
+import { Genre, GenreGame, GenreModel } from "./dataDbModel/genres";
+import { Platform, PlatformGame, PlatformModel } from "./dataDbModel/platform";
 
 interface rawgWrap {
   count: number;
   next: string;
   previous: string;
-  results: IGame[];
+  results: any[];
 }
 
 interface IGame {
-  id: number;
+  id?: number;
   name: string;
-  image: string;
-  platforms: platform[];
+  image?: string;
+  platforms?: IPlatform[];
   released: string;
   developer: string;
   rating: number;
-  genres: genres[];
-  reviews: reviews[];
+  genres?: IGenre[];
+  reviews?: IReview[];
 }
 
 interface subOption {
-  id: number;
+  id?: number;
   name: string;
   slug?: string;
 }
 
-interface platform extends subOption {}
-interface genres extends subOption {}
-interface reviews extends subOption {}
+interface IPlatform extends subOption {}
+interface IGenre extends subOption {}
+interface IReview extends subOption {}
 
-const checkGamesToSave = (nameList: string[]): Observable<IGame[]> => {
-  console.log(`Get All Users from DB`);
-  return deferrer(
-    Game.findAll({
+async function findGamesOrCreate(games: IGame[]) {
+  for (const game of games) {
+    console.log("create game");
+    const [gameRow, created] = await Game.findOrCreate({
       where: {
-        game_name: nameList,
+        game_name: game.name,
+        release_date: game.released,
+        image_game: game.image,
+        developer: game.developer,
+        rating: game.rating,
       },
-    })
-  ).pipe(
-    map((games: GameModel[]) => {
-      return games.map(
-        (game: GameModel): IGame => ({
-          id: game.id,
-          name: game.game_name,
-          image: game.image_game,
-          developer: game.developer,
-          platforms: [],
-          released: game.release_date,
-          rating: game.rating,
-          genres: [],
-          reviews: [],
-        })
-      );
-    })
-  );
-};
+    });
+
+    if (created) {
+      for (const genre of game.genres) {
+        console.log("find genre");
+        const [genreRow, created] = await Genre.findOrCreate({
+          where: {
+            genre: genre,
+          },
+        });
+
+        console.log("Create genre");
+        console.log(JSON.stringify(gameRow));
+        console.log(JSON.stringify(gameRow.get("id")));
+        await GenreGame.create({
+          idGame: gameRow.get("id"),
+          idGenre: genreRow.get("id"),
+        });
+      }
+
+      for (const platform of game.platforms) {
+        console.log("find platform");
+
+        const [platformRow, created] = await Platform.findOrCreate({
+          where: {
+            platform: platform,
+          },
+        });
+
+        console.log("create platform");
+        await PlatformGame.create({
+          idGame: gameRow.get("id"),
+          idPlatform: platformRow.get("id"),
+        });
+      }
+    }
+  }
+}
 
 const createMany = (games: any[]) => {
   console.log(`Create the games in DB`);
   return deferrer(Game.bulkCreate(games));
 };
 
-export { IGame, rawgWrap, genres, platform, checkGamesToSave, createMany };
+export { IGame, rawgWrap, IGenre, IPlatform, findGamesOrCreate };

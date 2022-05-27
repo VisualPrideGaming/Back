@@ -1,15 +1,19 @@
 import { timestamp } from "rxjs";
 import { DataTypes } from "sequelize";
 import { connection } from "../../util/db";
+import { Genre, GenreGame } from "./genres";
+import { Platform, PlatformGame } from "./platform";
 
 const Game = connection.define(
   "games",
   {
-    //id: DataTypes.NUMBER,
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
     game_name: DataTypes.STRING,
-    platform: DataTypes.NUMBER,
     release_date: DataTypes.DATE,
-    genre: DataTypes.NUMBER,
     image_game: DataTypes.STRING,
     developer: DataTypes.STRING,
     rating: DataTypes.NUMBER,
@@ -17,14 +21,21 @@ const Game = connection.define(
   { timestamps: false, freezeTableName: true }
 );
 
+// Game.belongsToMany(Genre, {
+//   through: GenreGame,
+// });
+
+// Game.belongsToMany(Platform, {
+//   through: PlatformGame,
+// });
+
 interface GameModel {
   id?: number;
   game_name: string;
-  platform: number;
   release_date: string;
-  genre: number;
   image_game: string;
   developer: string;
   rating: number;
 }
+
 export { Game, GameModel };

@@ -46,7 +46,7 @@ router.get("/games/top", function (req, res) {
   getTopGames().subscribe(
     (games: rawgWrap) => {
       if (games) {
-        console.log(games);
+        //console.log(games);
         console.log(`Found ${games.count} games`);
         res.send(games);
       }
