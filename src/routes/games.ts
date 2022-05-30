@@ -15,7 +15,6 @@ router.get("/games", function (req, res) {
   getAllGames().subscribe(
     (games: rawgWrap) => {
       if (games) {
-        console.log(games);
         console.log(`Found ${games.count} games`);
         res.send(games);
       }
@@ -30,6 +29,7 @@ router.get("/games", function (req, res) {
 router.get("/games/filter", checkQueryParam(["search"]), function (req, res) {
   getGamesFiltered(req.query.search.toString()).subscribe(
     (games: rawgWrap) => {
+      console.log(games);
       if (games) {
         console.log(`Found ${games.count} games`);
         res.send(games);

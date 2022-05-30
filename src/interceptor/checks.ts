@@ -10,7 +10,9 @@ const checkAuth = (req, res, next) => {
 const checkQueryParam = (requiredParams: string[]) => {
   return (req, res, next) => {
     let errors = [];
-    for (const param in requiredParams) {
+
+    console.log(requiredParams);
+    for (const param of requiredParams) {
       if (req.query[param] === undefined) {
         errors.push(`Falta un parámetro obligatorio: ${param}`);
       }

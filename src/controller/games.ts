@@ -23,26 +23,21 @@ const getAllGames = (): Observable<rawgWrap> => {
   return deferrer(axios.get(`/games`)).pipe(map((res) => res.data));
 };
 
-const getGamesFiltered = (filter: string): Observable<rawgWrap> => {
-  return deferrer(axios.get(`/games?search=${filter}`));
+const getGamesFiltered = (filter: string): Observable<any> => {
+  return deferrer(axios.get(`/games?search=${filter}`)).pipe(
+    map((res) => res.data),
+    switchMap((res: rawgWrap) => {
+      return mapAndCreateGame(res.results);
+    })
+  );
 };
 
-const getTopGames = (): Observable<rawgWrap> => {
+const getTopGames = (): Observable<any> => {
   console.log("axios call");
-  return deferrer(axios.get(`/games?ordering=-rating&page_size=10`)).pipe(
+  return deferrer(axios.get(`/games?ordering=meteacritic&page_size=10`)).pipe(
     map((res) => res.data),
-    tap((res: rawgWrap) => {
-      const gamesToCheck = res.results.map((game) => ({
-        name: game.name,
-        released: game.released,
-        developer: null,
-        rating: game.rating,
-        image: game.background_image,
-        genres: game.genres.map((genre) => genre.name),
-        platforms: game.platforms.map((platform) => platform.platform.name),
-      }));
-
-      findGamesOrCreate(gamesToCheck);
+    switchMap((res: rawgWrap) => {
+      return mapAndCreateGame(res.results);
     })
   );
 };
@@ -55,5 +50,19 @@ const generateRawgWrap = () => {
     results: [],
   };
 };
+
+function mapAndCreateGame(games: any[]) {
+  const gamesToCheck = games.map((game) => ({
+    name: game.name,
+    released: game.released,
+    developer: null,
+    rating: game.rating,
+    image: game.background_image,
+    genres: game.genres.map((genre) => genre.name),
+    platforms: game.platforms.map((platform) => platform.platform.name),
+  }));
+
+  return deferrer(findGamesOrCreate(gamesToCheck));
+}
 
 export { getAllGames, getGamesFiltered, getTopGames };

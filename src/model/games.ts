@@ -49,6 +49,9 @@ async function findGamesOrCreate(games: IGame[]) {
     const [gameRow, created] = await Game.findOrCreate({
       where: {
         game_name: game.name,
+      },
+      defaults: {
+        game_name: game.name,
         release_date: game.released,
         image_game: game.image,
         developer: game.developer,
@@ -91,6 +94,36 @@ async function findGamesOrCreate(games: IGame[]) {
       }
     }
   }
+
+  const gamesFound = await Game.sequelize.query(
+    `
+    SELECT g.id as id, game_name as name, release_date as released, image_game as image, developer as developer, rating as rating , GROUP_CONCAT(DISTINCT (ge.genre)) as genres ,GROUP_CONCAT(DISTINCT (p.platform)) as platforms 
+    from games g
+    LEFT join
+    platform_games pg
+    on
+    g.id = pg.idGame
+    LEFT join platforms p
+    on 
+    p.id = pg.idPlatform
+    LEFT join genres_games gg
+    on
+    g.id = pg.idGame
+    LEFT join genres ge
+    on
+    p.id = gg.idGenre
+    where
+    game_name in (${games
+      .map((a) => "'" + a.name.replace("'", "''") + "'")
+      .join()})
+    GROUP BY g.id;
+    `
+  );
+  return gamesFound[0].map((game: any) => ({
+    ...game,
+    genres: game.genres?.split(","),
+    platforms: game.platforms?.split(","),
+  }));
 }
 
 const createMany = (games: any[]) => {
