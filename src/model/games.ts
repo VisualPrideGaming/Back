@@ -43,6 +43,7 @@ interface IPlatform extends subOption {}
 interface IGenre extends subOption {}
 interface IReview extends subOption {}
 
+//Busca en la base de datos el juego si esta creado no hace nada y si no esta creado lo crea
 async function findGamesOrCreate(games: IGame[]) {
   for (const game of games) {
     console.log("create game");

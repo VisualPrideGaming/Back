@@ -10,6 +10,7 @@ import {
 import { rawgWrap } from "../model/games";
 
 // List all games
+//
 router.get("/games", function (req, res) {
   console.log("/games");
   getAllGames().subscribe(
@@ -26,6 +27,7 @@ router.get("/games", function (req, res) {
 });
 
 // Search games by filter
+//localhost:3003/games/filter?search=campoArellenar
 router.get("/games/filter", checkQueryParam(["search"]), function (req, res) {
   getGamesFiltered(req.query.search.toString()).subscribe(
     (games: rawgWrap) => {
@@ -41,6 +43,7 @@ router.get("/games/filter", checkQueryParam(["search"]), function (req, res) {
   );
 });
 
+//localhost:3003/games/top
 router.get("/games/top", function (req, res) {
   console.log("/games/top");
   getTopGames().subscribe(

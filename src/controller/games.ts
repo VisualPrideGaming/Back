@@ -18,11 +18,13 @@ axios.interceptors.request.use(function (config) {
   return config;
 });
 
+//endpoint de sacar todos los juegos
 const getAllGames = (): Observable<rawgWrap> => {
   console.log("axios call");
   return deferrer(axios.get(`/games`)).pipe(map((res) => res.data));
 };
 
+//endpoit de sacar los juegos filtrados por nombre
 const getGamesFiltered = (filter: string): Observable<any> => {
   return deferrer(axios.get(`/games?search=${filter}`)).pipe(
     map((res) => res.data),
@@ -32,6 +34,7 @@ const getGamesFiltered = (filter: string): Observable<any> => {
   );
 };
 
+//endpoint de sacar 10 juegos ordenados por las criticas mas positivas
 const getTopGames = (): Observable<any> => {
   console.log("axios call");
   return deferrer(axios.get(`/games?ordering=meteacritic&page_size=10`)).pipe(
@@ -51,6 +54,7 @@ const generateRawgWrap = () => {
   };
 };
 
+//
 function mapAndCreateGame(games: any[]) {
   const gamesToCheck = games.map((game) => ({
     name: game.name,

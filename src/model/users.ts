@@ -1,4 +1,4 @@
-import { Observable, of } from "rxjs";
+import { async, Observable, of } from "rxjs";
 import { connection } from "../util/db";
 import { deferrer } from "../util/promise2Observable";
 import { User } from "./dataDbModel/user";
@@ -20,4 +20,32 @@ const createUser = (user: IUser): Observable<IUser[]> => {
   return deferrer(User.create({ nickname: user.nickname, rol: user.rol }));
 };
 
-export { IUser, getUsers, createUser };
+const getUserDataFromDB = async (user: number) => {
+  const queryDeseados = getStatusGameQuery("Deseado", user);
+  const listDeaseados = await User.sequelize.query(queryDeseados);
+
+  const queryPasados = getStatusGameQuery("Pasado", user);
+  const listPasados = await User.sequelize.query(queryPasados);
+
+  const queryFavoritos = getStatusGameQuery("Favoritos", user);
+  const listFavoritos = await User.sequelize.query(queryFavoritos);
+
+  return {
+    deseados: listDeaseados,
+    favoritos: listFavoritos,
+    pasados: listPasados,
+  };
+};
+
+function getStatusGameQuery(status: string, id: number) {
+  return `
+SELECT g.* FROM games g
+INNER JOIN games_user gu
+on
+g.id = gu.id_game
+WHERE 
+gu.status_game = "${status}" AND
+gu.id_user = ${id};`;
+}
+
+export { IUser, getUsers, createUser, getUserDataFromDB };
