@@ -2,6 +2,7 @@ import { async, Observable, of } from "rxjs";
 import { connection } from "../util/db";
 import { deferrer } from "../util/promise2Observable";
 import { User } from "./dataDbModel/user";
+import { UserData } from "./dataDbModel/userDataLists";
 
 interface IUser {
   id?: number;
@@ -18,6 +19,20 @@ const createUser = (user: IUser): Observable<IUser[]> => {
   console.log(`Get All Users from DB`);
   //const usuario: IUser = { nickname: "moshi", rol: "admin" };
   return deferrer(User.create({ nickname: user.nickname, rol: user.rol }));
+};
+
+const createUserDataDB = (
+  userId: number,
+  gameId: number,
+  status: string
+): Observable<IUser[]> => {
+  return deferrer(
+    UserData.create({
+      id_game: gameId,
+      id_user: userId,
+      status_game: status,
+    })
+  );
 };
 
 const getUserDataFromDB = async (user: number) => {
@@ -48,4 +63,4 @@ gu.status_game = "${status}" AND
 gu.id_user = ${id};`;
 }
 
-export { IUser, getUsers, createUser, getUserDataFromDB };
+export { IUser, getUsers, createUser, getUserDataFromDB, createUserDataDB };

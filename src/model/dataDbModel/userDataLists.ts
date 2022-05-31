@@ -6,9 +6,18 @@ import { User } from "./user";
 const UserData = connection.define(
   "games_user",
   {
-    id_juego: DataTypes.NUMBER,
-    id_usuario: DataTypes.STRING,
-    estado: DataTypes.STRING,
+    id_game: {
+      primaryKey: true,
+      type: DataTypes.NUMBER,
+    },
+    id_user: {
+      primaryKey: true,
+      type: DataTypes.NUMBER,
+    },
+    status_game: {
+      primaryKey: true,
+      type: DataTypes.STRING,
+    },
   },
   { timestamps: false, freezeTableName: true }
 );

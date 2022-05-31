@@ -5,6 +5,7 @@ import {
   getUsers as read,
   createUser as create,
   getUserDataFromDB,
+  createUserDataDB,
 } from "../model/users";
 import { deferrer } from "../util/promise2Observable";
 
@@ -20,4 +21,9 @@ const getUserData = (id: number): Observable<IUser[]> => {
   return deferrer(getUserDataFromDB(id));
 };
 
-export { getAllUsers, createUser, getUserData };
+const createUserData = (req, res): Observable<IUser[]> => {
+  const { userId, gameId, status } = req.body;
+  return createUserDataDB(userId, gameId, status);
+};
+
+export { getAllUsers, createUser, getUserData, createUserData };
