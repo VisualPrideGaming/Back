@@ -8,6 +8,8 @@ import {
   getUserData,
   createUserData,
   deleteUserData,
+  createUserReview,
+  getReview,
 } from "../controller/users";
 import { deleteUserDataDB, IUser } from "../model/users";
 
@@ -46,6 +48,18 @@ router.post("/users/data", function (req, res) {
 
 router.delete("/users/data", function (req, res) {
   deleteUserData(req, res).subscribe((userData: any[]) => {
+    res.send(userData);
+  });
+});
+
+router.post("/users/reviews", function (req, res) {
+  createUserReview(req, res).subscribe((userData: any[]) => {
+    res.send(userData);
+  });
+});
+
+router.get("/users/reviews", checkQueryParam(["user"]), function (req, res) {
+  getReview(+req.query.user.toString()).subscribe((userData: any) => {
     res.send(userData);
   });
 });

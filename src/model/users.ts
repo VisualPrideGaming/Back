@@ -1,6 +1,7 @@
 import { async, Observable, of } from "rxjs";
 import { connection } from "../util/db";
 import { deferrer } from "../util/promise2Observable";
+import { Review } from "./dataDbModel/review";
 import { User } from "./dataDbModel/user";
 import { UserData } from "./dataDbModel/userDataLists";
 
@@ -70,6 +71,31 @@ const deleteUserDataDB = async (
   });
 };
 
+const createReviewDB = (
+  userId: number,
+  gameId: number,
+  score: number,
+  review: string
+): Observable<IUser[]> => {
+  return deferrer(
+    Review.create({
+      id_game: gameId,
+      id_user: userId,
+      score: score,
+      review: review,
+    })
+  );
+};
+
+const getReviewDB = async (user: number) => {
+  const queryReview = getReviewQuery(user);
+  const listReview = await User.sequelize.query(queryReview);
+
+  return {
+    reviews: listReview[0],
+  };
+};
+
 function getStatusGameQuery(status: string, id: number) {
   return `
 SELECT g.* FROM games g
@@ -81,6 +107,16 @@ gu.status_game = "${status}" AND
 gu.id_user = ${id};`;
 }
 
+function getReviewQuery(id: number) {
+  return `
+  SELECT g.* , r.review , r.score  FROM games g 
+  INNER JOIN reviews r
+  on
+  g.id = r.id_game
+  WHERE 
+  r.id_user = ${id};`;
+}
+
 export {
   IUser,
   getUsers,
@@ -88,4 +124,6 @@ export {
   getUserDataFromDB,
   createUserDataDB,
   deleteUserDataDB,
+  createReviewDB,
+  getReviewDB,
 };
