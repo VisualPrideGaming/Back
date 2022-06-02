@@ -45,11 +45,29 @@ const getUserDataFromDB = async (user: number) => {
   const queryFavoritos = getStatusGameQuery("Favoritos", user);
   const listFavoritos = await User.sequelize.query(queryFavoritos);
 
+  const queryComprado = getStatusGameQuery("Comprado", user);
+  const listComprado = await User.sequelize.query(queryComprado);
+
   return {
     deseados: listDeaseados,
     favoritos: listFavoritos,
     pasados: listPasados,
+    comprado: listComprado,
   };
+};
+
+const deleteUserDataDB = async (
+  userId: number,
+  gameId: number,
+  status: string
+) => {
+  const destroyAllHumans = await UserData.destroy({
+    where: {
+      id_game: gameId,
+      id_user: userId,
+      status_game: status,
+    },
+  });
 };
 
 function getStatusGameQuery(status: string, id: number) {
@@ -63,4 +81,11 @@ gu.status_game = "${status}" AND
 gu.id_user = ${id};`;
 }
 
-export { IUser, getUsers, createUser, getUserDataFromDB, createUserDataDB };
+export {
+  IUser,
+  getUsers,
+  createUser,
+  getUserDataFromDB,
+  createUserDataDB,
+  deleteUserDataDB,
+};

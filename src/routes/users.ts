@@ -7,8 +7,9 @@ import {
   createUser,
   getUserData,
   createUserData,
+  deleteUserData,
 } from "../controller/users";
-import { IUser } from "../model/users";
+import { deleteUserDataDB, IUser } from "../model/users";
 
 router.get("/users", function (req, res) {
   getAllUsers(req, res).subscribe((users: IUser[]) => {
@@ -22,14 +23,29 @@ router.post("/users", function (req, res) {
   });
 });
 
+//localhost:3003/users/data?user=1
 router.get("/users/data", checkQueryParam(["user"]), function (req, res) {
   getUserData(+req.query.user.toString()).subscribe((userData: any[]) => {
     res.send(userData);
   });
 });
 
+//localhost:3003/users/data
+/*
+{
+    "userId" : 1,
+    "gameId" : 42,
+    "status" : "Deseado"
+}
+*/
 router.post("/users/data", function (req, res) {
   createUserData(req, res).subscribe((userData: any[]) => {
+    res.send(userData);
+  });
+});
+
+router.delete("/users/data", function (req, res) {
+  deleteUserData(req, res).subscribe((userData: any[]) => {
     res.send(userData);
   });
 });
