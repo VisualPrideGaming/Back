@@ -1,5 +1,10 @@
-import { catchError, EMPTY, map, Observable, of, switchMap, tap } from "rxjs";
-import { findGamesOrCreate, IGame, rawgWrap } from "../model/games";
+import { catchError, map, Observable, of, switchMap, tap } from "rxjs";
+import {
+  findGamesOrCreate,
+  getReviewGameDB,
+  IGame,
+  rawgWrap,
+} from "../model/games";
 import { deferrer } from "../util/promise2Observable";
 import env from "../util/config";
 import axiosMaster from "axios";
@@ -21,12 +26,24 @@ axios.interceptors.request.use(function (config) {
 //sacar todos los juegos
 const getAllGames = (): Observable<rawgWrap> => {
   console.log("axios call");
-  return deferrer(axios.get(`/games`)).pipe(map((res) => res.data));
+  return deferrer(axios.get(`/games`)).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    ),
+    map((res) => res.data)
+  );
 };
 
 //sacar los juegos filtrados por nombre
 const getGamesFiltered = (filter: string): Observable<any> => {
   return deferrer(axios.get(`/games?search=${filter}`)).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    ),
     map((res) => res.data),
     switchMap((res: rawgWrap) => {
       return mapAndCreateGame(res.results);
@@ -38,6 +55,11 @@ const getGamesFiltered = (filter: string): Observable<any> => {
 const getTopGames = (): Observable<any> => {
   console.log("axios call");
   return deferrer(axios.get(`/games?ordering=meteacritic&page_size=10`)).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    ),
     map((res) => res.data),
     switchMap((res: rawgWrap) => {
       return mapAndCreateGame(res.results);
@@ -45,13 +67,14 @@ const getTopGames = (): Observable<any> => {
   );
 };
 
-const generateRawgWrap = () => {
-  return {
-    count: 0,
-    next: "",
-    previous: "",
-    results: [],
-  };
+const getReviewGame = (idGame: number): Observable<IGame[]> => {
+  return deferrer(getReviewGameDB(idGame)).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
+  );
 };
 
 //
@@ -66,7 +89,13 @@ function mapAndCreateGame(games: any[]) {
     platforms: game.platforms.map((platform) => platform.platform.name),
   }));
 
-  return deferrer(findGamesOrCreate(gamesToCheck));
+  return deferrer(findGamesOrCreate(gamesToCheck)).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
+  );
 }
 
-export { getAllGames, getGamesFiltered, getTopGames };
+export { getAllGames, getGamesFiltered, getTopGames, getReviewGame };

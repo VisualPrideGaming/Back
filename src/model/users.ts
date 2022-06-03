@@ -1,4 +1,4 @@
-import { async, Observable, of } from "rxjs";
+import { async, catchError, Observable, of } from "rxjs";
 import { connection } from "../util/db";
 import { deferrer } from "../util/promise2Observable";
 import { Review } from "./dataDbModel/review";
@@ -13,13 +13,25 @@ interface IUser {
 
 const getUsers = (): Observable<IUser[]> => {
   console.log(`Get All Users from DB`);
-  return deferrer(User.findAll());
+  return deferrer(User.findAll()).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
+  );
 };
 
 const createUser = (user: IUser): Observable<IUser[]> => {
   console.log(`Get All Users from DB`);
   //const usuario: IUser = { nickname: "moshi", rol: "admin" };
-  return deferrer(User.create({ nickname: user.nickname, rol: user.rol }));
+  return deferrer(User.create({ nickname: user.nickname, rol: user.rol })).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
+  );
 };
 
 const createUserDataDB = (
@@ -33,28 +45,40 @@ const createUserDataDB = (
       id_user: userId,
       status_game: status,
     })
+  ).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
   );
 };
 
 const getUserDataFromDB = async (user: number) => {
-  const queryDeseados = getStatusGameQuery("Deseado", user);
-  const listDeaseados = await User.sequelize.query(queryDeseados);
+  try {
+    const queryDeseados = getStatusGameQuery("Deseado", user);
+    const listDeaseados = await User.sequelize.query(queryDeseados);
 
-  const queryPasados = getStatusGameQuery("Pasado", user);
-  const listPasados = await User.sequelize.query(queryPasados);
+    const queryPasados = getStatusGameQuery("Pasado", user);
+    const listPasados = await User.sequelize.query(queryPasados);
 
-  const queryFavoritos = getStatusGameQuery("Favoritos", user);
-  const listFavoritos = await User.sequelize.query(queryFavoritos);
+    const queryFavoritos = getStatusGameQuery("Favoritos", user);
+    const listFavoritos = await User.sequelize.query(queryFavoritos);
 
-  const queryComprado = getStatusGameQuery("Comprado", user);
-  const listComprado = await User.sequelize.query(queryComprado);
+    const queryComprado = getStatusGameQuery("Comprado", user);
+    const listComprado = await User.sequelize.query(queryComprado);
 
-  return {
-    deseados: listDeaseados,
-    favoritos: listFavoritos,
-    pasados: listPasados,
-    comprado: listComprado,
-  };
+    return {
+      deseados: listDeaseados[0],
+      favoritos: listFavoritos[0],
+      pasados: listPasados[0],
+      comprado: listComprado[0],
+    };
+  } catch (error) {
+    return new Promise(() => {
+      throw error;
+    });
+  }
 };
 
 const deleteUserDataDB = async (
@@ -62,13 +86,36 @@ const deleteUserDataDB = async (
   gameId: number,
   status: string
 ) => {
-  const destroyAllHumans = await UserData.destroy({
-    where: {
-      id_game: gameId,
-      id_user: userId,
-      status_game: status,
-    },
-  });
+  try {
+    await UserData.destroy({
+      where: {
+        id_game: gameId,
+        id_user: userId,
+        status_game: status,
+      },
+    });
+    return getUserDataFromDB(userId);
+  } catch (error) {
+    return new Promise(() => {
+      throw error;
+    });
+  }
+};
+
+const deleteReviewDB = async (userId: number, gameId: number) => {
+  try {
+    await Review.destroy({
+      where: {
+        id_game: gameId,
+        id_user: userId,
+      },
+    });
+    return await getReviewDB(userId);
+  } catch (error) {
+    return new Promise(() => {
+      throw error;
+    });
+  }
 };
 
 const createReviewDB = (
@@ -84,16 +131,28 @@ const createReviewDB = (
       score: score,
       review: review,
     })
+  ).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
   );
 };
 
 const getReviewDB = async (user: number) => {
-  const queryReview = getReviewQuery(user);
-  const listReview = await User.sequelize.query(queryReview);
+  try {
+    const queryReview = getReviewQuery(user);
+    const listReview = await User.sequelize.query(queryReview);
 
-  return {
-    reviews: listReview[0],
-  };
+    return {
+      reviews: listReview[0],
+    };
+  } catch (error) {
+    return new Promise(() => {
+      throw error;
+    });
+  }
 };
 
 function getStatusGameQuery(status: string, id: number) {
@@ -126,4 +185,5 @@ export {
   deleteUserDataDB,
   createReviewDB,
   getReviewDB,
+  deleteReviewDB,
 };

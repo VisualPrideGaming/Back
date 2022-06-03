@@ -10,6 +10,7 @@ import {
   deleteUserData,
   createUserReview,
   getReview,
+  deleteReview,
 } from "../controller/users";
 import { deleteUserDataDB, IUser } from "../model/users";
 
@@ -60,6 +61,12 @@ router.post("/users/reviews", function (req, res) {
 
 router.get("/users/reviews", checkQueryParam(["user"]), function (req, res) {
   getReview(+req.query.user.toString()).subscribe((userData: any) => {
+    res.send(userData);
+  });
+});
+
+router.delete("/users/reviews", function (req, res) {
+  deleteReview(req, res).subscribe((userData: any) => {
     res.send(userData);
   });
 });

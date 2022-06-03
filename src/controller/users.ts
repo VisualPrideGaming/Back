@@ -1,4 +1,4 @@
-import { Observable, of } from "rxjs";
+import { catchError, Observable, of, throwError } from "rxjs";
 import { Sequelize } from "sequelize/types";
 import {
   IUser,
@@ -9,6 +9,7 @@ import {
   deleteUserDataDB,
   createReviewDB,
   getReviewDB,
+  deleteReviewDB,
 } from "../model/users";
 import { deferrer } from "../util/promise2Observable";
 
@@ -21,7 +22,13 @@ const createUser = (req, res): Observable<IUser[]> => {
 };
 
 const getUserData = (id: number): Observable<IUser[]> => {
-  return deferrer(getUserDataFromDB(id));
+  return deferrer(getUserDataFromDB(id)).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
+  );
 };
 
 const createUserData = (req, res): Observable<IUser[]> => {
@@ -31,8 +38,13 @@ const createUserData = (req, res): Observable<IUser[]> => {
 
 const deleteUserData = (req, res): Observable<IUser[]> => {
   const { userId, gameId, status } = req.body;
-  deleteUserDataDB(userId, gameId, status);
-  return deferrer(getUserDataFromDB(userId));
+  return deferrer(deleteUserDataDB(userId, gameId, status)).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
+  );
 };
 
 const createUserReview = (req, res): Observable<IUser[]> => {
@@ -41,7 +53,24 @@ const createUserReview = (req, res): Observable<IUser[]> => {
 };
 
 const getReview = (idUser: number): Observable<IUser[]> => {
-  return deferrer(getReviewDB(idUser));
+  return deferrer(getReviewDB(idUser)).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
+  );
+};
+
+const deleteReview = (req, res): Observable<IUser[]> => {
+  const { userId, gameId } = req.body;
+  return deferrer(deleteReviewDB(userId, gameId)).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
+  );
 };
 
 export {
@@ -52,4 +81,5 @@ export {
   deleteUserData,
   createUserReview,
   getReview,
+  deleteReview,
 };

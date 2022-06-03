@@ -5,6 +5,7 @@ import { checkQueryParam } from "../interceptor/checks";
 import {
   getAllGames,
   getGamesFiltered,
+  getReviewGame,
   getTopGames,
 } from "../controller/games";
 import { rawgWrap } from "../model/games";
@@ -58,6 +59,12 @@ router.get("/games/top", function (req, res) {
       console.error(error);
     }
   );
+});
+
+router.get("/games/reviews", checkQueryParam(["game"]), function (req, res) {
+  getReviewGame(+req.query.game.toString()).subscribe((gameData: any) => {
+    res.send(gameData);
+  });
 });
 
 export { router };
