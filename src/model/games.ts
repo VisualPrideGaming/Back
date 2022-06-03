@@ -50,7 +50,7 @@ async function findGamesOrCreate(games: IGame[]) {
       console.log("create game");
       const [gameRow, created] = await Game.findOrCreate({
         where: {
-          game_names: game.name,
+          game_name: game.name,
         },
         defaults: {
           game_name: game.name,
