@@ -67,6 +67,7 @@ const getTopGames = (): Observable<any> => {
   );
 };
 
+//saca las reviews de un juego
 const getReviewGame = (idGame: number): Observable<IGame[]> => {
   return deferrer(getReviewGameDB(idGame)).pipe(
     catchError((error) =>
@@ -77,7 +78,6 @@ const getReviewGame = (idGame: number): Observable<IGame[]> => {
   );
 };
 
-//
 function mapAndCreateGame(games: any[]) {
   const gamesToCheck = games.map((game) => ({
     name: game.name,

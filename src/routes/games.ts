@@ -61,6 +61,7 @@ router.get("/games/top", function (req, res) {
   );
 });
 
+//localhost:3003/games/reviews
 router.get("/games/reviews", checkQueryParam(["game"]), function (req, res) {
   getReviewGame(+req.query.game.toString()).subscribe((gameData: any) => {
     res.send(gameData);

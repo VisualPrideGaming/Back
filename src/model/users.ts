@@ -118,6 +118,31 @@ const deleteReviewDB = async (userId: number, gameId: number) => {
   }
 };
 
+const modifyReviewDB = (
+  userId: number,
+  gameId: number,
+  score: number,
+  review: string
+): Observable<IUser[]> => {
+  return deferrer(
+    Review.update(
+      { score, review },
+      {
+        where: {
+          id_game: gameId,
+          id_user: userId,
+        },
+      }
+    )
+  ).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
+  );
+};
+
 const createReviewDB = (
   userId: number,
   gameId: number,
@@ -186,4 +211,5 @@ export {
   createReviewDB,
   getReviewDB,
   deleteReviewDB,
+  modifyReviewDB,
 };

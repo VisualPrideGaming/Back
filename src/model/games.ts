@@ -132,6 +132,7 @@ async function findGamesOrCreate(games: IGame[]) {
   }
 }
 
+//busca las reviews de un juego
 const getReviewGameDB = async (game: number) => {
   try {
     const queryReview = getReviewGameQuery(game);
@@ -147,6 +148,7 @@ const getReviewGameDB = async (game: number) => {
   }
 };
 
+//query de sacar las reviews de juego
 function getReviewGameQuery(id: number) {
   return `
   SELECT u.* , r.review , r.score  FROM users u
