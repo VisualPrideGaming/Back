@@ -4,6 +4,7 @@ const router = express.Router();
 import { checkQueryParam } from "../interceptor/checks";
 import {
   getAllGames,
+  getGameById,
   getGamesFiltered,
   getReviewGame,
   getTopGames,
@@ -31,6 +32,23 @@ router.get("/games", function (req, res) {
 //localhost:3003/games/filter?search=campoArellenar
 router.get("/games/filter", checkQueryParam(["search"]), function (req, res) {
   getGamesFiltered(req.query.search.toString()).subscribe(
+    (games: rawgWrap) => {
+      console.log(games);
+      if (games) {
+        console.log(`Found ${games.count} games`);
+        res.send(games);
+      }
+    },
+    (error) => {
+      console.error(error);
+    }
+  );
+});
+
+// Search games by filter
+//localhost:3003/game?game=43
+router.get("/game", checkQueryParam(["game"]), function (req, res) {
+  getGameById(+req.query.game.toString()).subscribe(
     (games: rawgWrap) => {
       console.log(games);
       if (games) {

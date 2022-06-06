@@ -1,6 +1,7 @@
 import { catchError, map, Observable, of, switchMap, tap } from "rxjs";
 import {
   findGamesOrCreate,
+  getGameByIdDB,
   getReviewGameDB,
   IGame,
   rawgWrap,
@@ -51,6 +52,17 @@ const getGamesFiltered = (filter: string): Observable<any> => {
   );
 };
 
+//saca un juego filtrado por id
+const getGameById = (filter: number): Observable<any> => {
+  return deferrer(getGameByIdDB(filter)).pipe(
+    catchError((error) =>
+      of({
+        error,
+      })
+    )
+  );
+};
+
 //sacar 10 juegos ordenados por las criticas mas positivas
 const getTopGames = (): Observable<any> => {
   console.log("axios call");
@@ -98,4 +110,10 @@ function mapAndCreateGame(games: any[]) {
   );
 }
 
-export { getAllGames, getGamesFiltered, getTopGames, getReviewGame };
+export {
+  getAllGames,
+  getGamesFiltered,
+  getTopGames,
+  getReviewGame,
+  getGameById,
+};

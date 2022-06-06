@@ -148,6 +148,39 @@ const getReviewGameDB = async (game: number) => {
   }
 };
 
+const getGameByIdDB = async (game: number) => {
+  try {
+    const queryReview = `
+    SELECT g.id as id, game_name as name, release_date as released, image_game as image, developer as developer, rating as rating , GROUP_CONCAT(DISTINCT (ge.genre)) as genres ,GROUP_CONCAT(DISTINCT (p.platform)) as platforms 
+    from games g
+    LEFT join
+    platform_games pg
+    on
+    g.id = pg.idGame
+    LEFT join platforms p
+    on 
+    p.id = pg.idPlatform
+    LEFT join genres_games gg
+    on
+    g.id = pg.idGame
+    LEFT join genres ge
+    on
+    p.id = gg.idGenre
+    where
+    g.id = ${game};`;
+    const games: any = await Game.sequelize.query(queryReview);
+    return {
+      ...games[0][0],
+      genres: games[0][0].genres.split(","),
+      platforms: games[0][0].platforms.split(","),
+    };
+  } catch (error) {
+    return new Promise(() => {
+      throw error;
+    });
+  }
+};
+
 //query de sacar las reviews de juego
 function getReviewGameQuery(id: number) {
   return `
@@ -166,4 +199,5 @@ export {
   IPlatform,
   findGamesOrCreate,
   getReviewGameDB,
+  getGameByIdDB,
 };
